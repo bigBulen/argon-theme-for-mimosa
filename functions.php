@@ -3884,3 +3884,47 @@ add_action('enqueue_block_editor_assets', function () {
     );
 });
 
+
+// ACGN列表 加上标题、头图
+add_filter('document_title_parts', function ($title_parts) {
+    if (get_query_var('apex_media_slug')) {
+        global $apex_media_list;
+        $slug = get_query_var('apex_media_slug');
+        if ($apex_media_list instanceof Apex_Media_List) {
+            $media = $apex_media_list->media_item_get_by_slug($slug);
+            if (!empty($media['title'])) {
+                $title_parts['title'] = $media['title'] . ' - Mimosa的小站';
+            }
+        }
+    }
+    return $title_parts;
+});
+
+add_action('wp_head', function () {
+    if (!get_query_var('apex_media_slug')) return;
+
+    global $apex_media_list;
+    if (!($apex_media_list instanceof Apex_Media_List)) return;
+
+    $slug = get_query_var('apex_media_slug');
+    $media = $apex_media_list->media_item_get_by_slug($slug);
+    if (!$media) return;
+
+    $title = $media['title'] . ' - Mimosa的小站';
+    $desc  = wp_strip_all_tags($media['review'] ?? '');
+    $desc  = mb_substr(trim($desc), 0, 80);
+    $img   = '';
+
+    if (!empty($media['cover_attachment_id'])) {
+        $img = wp_get_attachment_image_url((int)$media['cover_attachment_id'], 'full');
+    }
+    if (!$img && !empty($media['cover_source_url'])) {
+        $img = $media['cover_source_url'];
+    }
+
+    echo "\n<!-- Apex Media OG -->\n";
+    echo '<meta property="og:title" content="' . esc_attr($title) . '">' . "\n";
+    echo '<meta property="og:description" content="' . esc_attr($desc) . '">' . "\n";
+    echo '<meta property="og:image" content="' . esc_url($img) . '">' . "\n";
+    echo '<meta name="description" content="' . esc_attr($desc) . '">' . "\n";
+}, 5);
