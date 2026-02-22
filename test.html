@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Markdown 预览与主题切换</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --muted: #666;
+      --border: #e5e5e5;
+      --link: #1e66f5;
+      --code-bg: #f6f8fa;
+    }
+    html.dark {
+      --bg: #121212;
+      --text: #eeeeee;
+      --muted: #aaaaaa;
+      --border: #2a2a2a;
+      --link: #8ab4f8;
+      --code-bg: #1c1c1c;
+    }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    }
+    a { color: var(--link); }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .title {
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    button, .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--muted); }
+    textarea#mdInput {
+      width: 100%;
+      min-height: 160px;
+      resize: vertical;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      padding: 10px 12px;
+      box-sizing: border-box;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 6px 0 12px;
+    }
+    .preview {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--bg);
+    }
+    /* Markdown 基本样式 */
+    .preview h1, .preview h2, .preview h3, .preview h4, .preview h5, .preview h6 {
+      margin: 1em 0 0.5em;
+      line-height: 1.25;
+    }
+    .preview p, .preview ul, .preview ol, .preview blockquote, .preview pre {
+      margin: 0.75em 0;
+    }
+    .preview code {
+      background: var(--code-bg);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+    }
+    .preview pre code {
+      display: block;
+      padding: 12px;
+      overflow: auto;
+      border-radius: 8px;
+    }
+    .preview hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 16px 0;
+    }
+  </style>
+  <!-- 正确引入 markdown-it，避免 window.markdownit 不是函数 -->
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">Markdown 预览</div>
+      <div class="actions">
+        <button id="themeToggle" type="button" aria-pressed="false">日间模式 / 夜间模式</button>
+        <button id="renderBtn" type="button">渲染 Markdown</button>
+      </div>
+    </header>
+
+    <textarea id="mdInput" placeholder="# 在此粘贴 Markdown 内容
+- 也可以使用 ?md=URL 通过链接加载 Markdown 文件
+- 点击上方“渲染 Markdown”按钮或键盘 Ctrl+Enter 进行渲染"></textarea>
+    <div class="hint">
+      提示：支持 ?md=URL 参数（例如 ?md=https://raw.githubusercontent.com/markedjs/marked/master/README.md）。
+      主题切换按钮文本已改为“日间模式 / 夜间模式”，可在浅色与深色模式之间切换。
+    </div>
+    <div id="mdOutput" class="preview"></div>
+  </div>
+
+  <script>
+    // 主题初始化与切换（文本固定为“日间模式 / 夜间模式”）
+    (function () {
+      const html = document.documentElement;
+      const storageKey = 'theme';
+      const btn = document.getElementById('themeToggle');
+
+      function applyTheme(theme) {
+        if (theme === 'dark') {
+          html.classList.add('dark');
+        } else {
+          html.classList.remove('dark');
+        }
+        localStorage.setItem(storageKey, theme);
+        btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+      }
+
+      const saved = localStorage.getItem(storageKey);
+      if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved);
+      } else {
+        // 跟随系统偏好
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(prefersDark ? 'dark' : 'light');
+      }
+
+      btn.addEventListener('click', () => {
+        const next = html.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(next);
+      });
+    })();
+
+    // Markdown 渲染逻辑
+    (function () {
+      const mdInput = document.getElementById('mdInput');
+      const mdOutput = document.getElementById('mdOutput');
+      const renderBtn = document.getElementById('renderBtn');
+
+      function getQueryParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+      }
+
+      function ensureMarkdownIt() {
+        // 处理 window.markdownit 不是函数的场景
+        if (typeof window.markdownit !== 'function') {
+          console.error('markdown-it 未正确加载或版本不兼容：', window.markdownit);
+          mdOutput.innerHTML = '<p style="color:#d22;">错误：markdown-it 未加载。请检查网络或 CDN 是否被阻止。</p>';
+          return null;
+        }
+        // 正确初始化实例
+        return window.markdownit({
+          html: true,
+          linkify: true,
+          typographer: true
+        });
+      }
+
+      async function fetchMarkdownFromParam() {
+        const url = getQueryParam('md');
+        if (!url) return null;
+        try {
+          const resp = await fetch(url, { mode: 'cors' });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const text = await resp.text();
+          return text;
+        } catch (e) {
+          console.error('加载远端 Markdown 失败：', e);
+          mdOutput.innerHTML = '<p style="color:#d22;">无法加载远端 Markdown：' + String(e) + '</p>';
+          return null;
+        }
+      }
+
+      function renderNow(md) {
+        const src = mdInput.value || '# 欢迎使用 Markdown 预览\n\n在上方粘贴内容或使用 ?md=URL 参数加载远端 Markdown。';
+        const html = md.render(src);
+        mdOutput.innerHTML = html;
+      }
+
+      async function initAndRender() {
+        const md = ensureMarkdownIt();
+        if (!md) return;
+
+        // 优先使用 ?md=URL 加载内容
+        const remote = await fetchMarkdownFromParam();
+        if (remote) {
+          mdInput.value = remote;
+        }
+        renderNow(md);
+      }
+
+      document.addEventListener('DOMContentLoaded', initAndRender);
+      renderBtn.addEventListener('click', initAndRender);
+      mdInput.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          initAndRender();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

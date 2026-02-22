@@ -1,0 +1,214 @@
+<!--赛博灯笼-->
+<!-- 顶部灯笼装饰 -->
+<script>
+// ========== 用户配置区 ==========
+// 设置屏幕最小宽度（像素），低于此宽度则不显示灯笼
+const LANTERN_MIN_WIDTH = 560; 
+// 设置四个灯笼上的字符
+const LANTERN_CHARS = ['乐', '快', '年', '新'];
+// ========== 配置结束 ==========
+
+(function() {
+    // 检查屏幕宽度
+    if (window.innerWidth < LANTERN_MIN_WIDTH) {
+        return;
+    }
+
+    // 动态加载字体
+    const fontPreload = document.createElement('link');
+    fontPreload.rel = 'preload';
+    fontPreload.as = 'style';
+    fontPreload.crossOrigin = 'anonymous';
+    fontPreload.href = 'https://fontsapi.zeoseven.com/482/main/result.css';
+    fontPreload.onload = function() { this.rel = 'stylesheet'; };
+    document.head.appendChild(fontPreload);
+
+    // noscript fallback
+    const noscript = document.createElement('noscript');
+    const fontLink = document.createElement('link');
+    fontLink.rel = 'stylesheet';
+    fontLink.href = 'https://fontsapi.zeoseven.com/482/main/result.css';
+    noscript.appendChild(fontLink);
+    document.head.appendChild(noscript);
+
+    // 创建CSS样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .deng-box, .deng-box1, .deng-box2, .deng-box3 { 
+            position: fixed; 
+            z-index: 9999; 
+            pointer-events: none; 
+            top: -40px;
+        }
+        .deng-box  { left:  55px; }
+        .deng-box1 { left: -50px; top: -30px; }
+        .deng-box2 { right: 55px; top: -30px; }
+        .deng-box3 { right:-50px; }
+        .deng, .deng-box1 .deng, .deng-box2 .deng {
+            position: relative; 
+            width:120px; 
+            height:90px; 
+            margin:50px;
+            background: rgba(216,0,15,0.8); 
+            border-radius:50% 50%;
+            transform-origin:50% -100px; 
+            animation:swing 4s infinite ease-in-out;
+            box-shadow:-5px 5px 50px 4px rgba(250,108,0,1);
+        }
+        .deng-a { 
+            width:100px; 
+            height:90px; 
+            margin:12px 8px 8px 10px;
+            background: rgba(216,0,15,0.1); 
+            border:2px solid #dc8f03; 
+            border-radius:50% 50%; 
+        }
+        .deng-b { 
+            width:45px; 
+            height:90px; 
+            margin:-2px 8px 8px 26px;
+            background: rgba(26,0,15,0.1); 
+            border:2px solid #dc8f03; 
+            border-radius:50% 50%; 
+        }
+        .xian { 
+            position:absolute; 
+            top:-20px; 
+            left:60px; 
+            width:2px; 
+            height:20px; 
+            background:#dc8f03; 
+        }
+        .shui-a { 
+            position:relative; 
+            width:5px; 
+            height:20px; 
+            margin:-5px 0 0 59px;
+            transform-origin:50% -45px; 
+            animation:swing 4s infinite ease-in-out;
+            background:#ffa500; 
+            border-radius:0 0 5px 5px; 
+        }
+        .shui-b { 
+            position:absolute; 
+            top:14px; 
+            left:-2px; 
+            width:10px; 
+            height:10px;
+            background:#dc8f03; 
+            border-radius:50%; 
+        }
+        .shui-c { 
+            position:absolute; 
+            top:18px; 
+            left:-2px; 
+            width:10px; 
+            height:35px;
+            background:#ffa500; 
+            border-radius:0 0 0 5px; 
+        }
+        /* 灯笼顶部和底部的扁矩形 */
+        .deng:before, .deng:after {
+            content:" "; 
+            position:absolute; 
+            display:block; 
+            width:60px; 
+            height:12px;
+            border:solid 1px #dc8f03; 
+            background:linear-gradient(to right,#dc8f03,#ffa500,#dc8f03,#ffa500,#dc8f03);
+        }
+        .deng:before { 
+            top:-7px; 
+            left:29px; 
+            border-radius:5px 5px 0 0; 
+        }
+        .deng:after  { 
+            bottom:-7px; 
+            left:30px; /* 此处调整了下方矩形的偏移，使其向左偏 */
+            border-radius:0 0 5px 5px; 
+        }
+        .deng-t {
+            font-family: 'CooperZhengKai', sans-serif; /* 应用指定楷体 */
+            font-size: 350% !important; /* 应用指定字号 */
+            color:#dc8f03;
+            font-weight:bold; 
+            line-height:85px; 
+            text-align:center;
+            margin-left:-8.5px; 
+            margin-top:4px;
+        }
+        @keyframes swing {
+            0%   { transform:rotate(-10deg); }
+            50%  { transform:rotate( 10deg); }
+            100% { transform:rotate(-10deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 创建灯笼HTML
+    const html = `
+        <div class="deng-box3">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">${LANTERN_CHARS[0]}</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="deng-box2">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">${LANTERN_CHARS[1]}</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="deng-box">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">${LANTERN_CHARS[2]}</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="deng-box1">
+            <div class="deng">
+                <div class="xian"></div>
+                <div class="deng-a">
+                    <div class="deng-b">
+                        <div class="deng-t">${LANTERN_CHARS[3]}</div>
+                    </div>
+                </div>
+                <div class="shui shui-a">
+                    <div class="shui-c"></div>
+                    <div class="shui-b"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 将灯笼添加到页面末尾
+    document.body.insertAdjacentHTML('beforeend', html);
+})();
+</script>
