@@ -56,17 +56,19 @@
 	<?php
 		$trim_words_count = get_option('argon_trim_words_count', 175);
 	?>
-	
-	
     <?php
+	// 显示摘要逻辑 Mimosa ver.
+	// 不会从正文截摘要（概览），只显示手动摘要和密码保护提示，否则不显示
     	$preview = '';
-    	if ($post -> post_excerpt){
-    		$preview = $post -> post_excerpt;
-    	}elseif (post_password_required()){
-    		$preview = __("这篇文章受密码保护，输入密码才能阅读", 'argon');
-    	}
-    
-    	if (!empty($preview)){
+		if ($post->post_excerpt) {
+			$preview = $post->post_excerpt;
+		} elseif (post_password_required()) {
+			$preview = __("这篇文章受密码保护，输入密码才能阅读", 'argon');
+		} else {
+			$preview = __("本文暂无摘要。", 'argon'); // 兜底提示
+		}
+
+		if (!empty($preview)) {
     ?>
     	<div class="post-content">
     		<?php 
@@ -77,8 +79,8 @@
     			}
     		?>
     	</div>
-    <?php } ?>
 
+    <?php } ?>
 	<?php if (has_tag()) { ?>
 		<div class="post-tags">
 			<i class="fa fa-tags" aria-hidden="true"></i>

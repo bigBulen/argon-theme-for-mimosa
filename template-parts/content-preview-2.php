@@ -15,31 +15,33 @@
 	<div class="post-content-container">
 		<a class="post-title" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
 		<?php
-			$trim_words_count = get_option('argon_trim_words_count', 175);
-		?>
-		<?php if ($trim_words_count > 0){ ?>
-			<div class="post-content">
-				<?php
-					if (get_option("argon_hide_shortcode_in_preview") == 'true'){
-						$preview = wp_trim_words(do_shortcode(get_the_content('...')), $trim_words_count);
-					}else{
-						$preview = wp_trim_words(get_the_content('...'), $trim_words_count);
-					}
-					if (post_password_required()){
-						$preview = __("这篇文章受密码保护，输入密码才能阅读", 'argon');
-					}
-					if ($preview == ""){
-						$preview = __("这篇文章没有摘要", 'argon');
-					}
-					if ($post -> post_excerpt){
-						$preview = $post -> post_excerpt;
-					}
-					echo $preview;
-				?>
-			</div>
-		<?php
-			}
-		?>
+		$trim_words_count = get_option('argon_trim_words_count', 175);
+	?>
+    <?php
+	// 显示摘要逻辑 Mimosa ver.
+	// 不会从正文截摘要（概览），只显示手动摘要和密码保护提示，否则不显示
+    	$preview = '';
+		if ($post->post_excerpt) {
+			$preview = $post->post_excerpt;
+		} elseif (post_password_required()) {
+			$preview = __("这篇文章受密码保护，输入密码才能阅读", 'argon');
+		} else {
+			$preview = __("本文暂无摘要。", 'argon'); // 兜底提示
+		}
+
+		if (!empty($preview)) {
+    ?>
+    	<div class="post-content">
+    		<?php 
+    			if (get_option("argon_hide_shortcode_in_preview") == 'true'){
+    				echo do_shortcode($preview);
+    			}else{
+    				echo $preview;
+    			}
+    		?>
+    	</div>
+
+    <?php } ?>
 		<div class="post-meta">
 			<?php
 				$metaList = explode('|', get_option('argon_article_meta', 'time|views|comments|categories'));
