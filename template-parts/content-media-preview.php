@@ -1,4 +1,9 @@
 <?php
+/*
+* 这是 真·acgn作品条目的预览卡片，只是一个卡片
+* 被用在主页和文章的短代码
+*/
+
 if (!defined('ABSPATH')) exit;
 
 global $apex_media_list;
