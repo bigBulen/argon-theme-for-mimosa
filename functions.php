@@ -238,45 +238,86 @@ function add_default_title_to_rss_shuoshuo($title, $post_id) {
 
 // 字数统计
 // 已添加至 settings.php
+/**
+ * 过滤代码并统计字数
+ */
+function mimosa_count_filtered_words($content) {
+    if (empty($content)) return 0;
+
+    // 过滤代码块
+    $content = preg_replace('/```.*?```/s', '', $content);
+    $content = preg_replace('/<pre.*?>.*?<\\/pre>/is', '', $content);
+    $content = preg_replace('/<code.*?>.*?<\\/code>/is', '', $content);
+    $content = preg_replace('/`[^`]+`/', '', $content);
+    $content = preg_replace('/\\[code\\].*?\\[\\/code\\]/is', '', $content);
+
+    // 去 HTML
+    $content = strip_tags($content);
+
+    return mb_strlen(trim($content));
+}
+
+
+/**
+ * 全站字数统计（文章 + ACGN 评测）
+ */
 function get_site_word_count_comparison_filtered() {
     global $wpdb;
 
-    // 从设置中获取文章类型列表（如 post,shuoshuo）
-    $post_types_raw = get_option('argon_mimosa_custom_post_types', 'post,shuoshuo');
-    $post_types = array_map('trim', explode(',', $post_types_raw));
-    $post_types_escaped = implode("','", array_map('esc_sql', $post_types));
-
-    // 获取所有指定类型已发布的文章
-    $post_ids = $wpdb->get_col("
-        SELECT ID FROM {$wpdb->prefix}posts
-        WHERE post_status = 'publish'
-          AND post_type IN ('$post_types_escaped')
-    ");
-
-    $total_words = 0;
-    foreach ($post_ids as $post_id) {
-        $content = get_post_field('post_content', $post_id);
-
-
-        // 过滤代码块和标签 开始
-        $content = preg_replace('/```.*?```/s', '', $content);
-        $content = preg_replace('/<pre.*?>.*?<\\/pre>/is', '', $content);
-        $content = preg_replace('/<code.*?>.*?<\\/code>/is', '', $content);
-        $content = preg_replace('/`[^`]+`/', '', $content);
-        $content = preg_replace('/\\[code\\].*?\\[\\/code\\]/is', '', $content);
-		// 过滤代码块和标签 结束（如需要统计代码则将此区间去掉）
-
-		$content = strip_tags($content);
-        $total_words += mb_strlen(trim($content));
+    // 🚀 结果缓存 12 小时
+    $cache_key = 'mimosa_site_word_count_filtered';
+    $cached = get_transient($cache_key);
+    if ($cached !== false) {
+        return $cached;
     }
 
-    // 获取书籍映射表（JSON 解码）
+    $total_words = 0;
+
+    // 1️⃣ WordPress 文章统计
+    $post_types_raw = get_option('argon_mimosa_custom_post_types', 'post,shuoshuo');
+    $post_types = array_map('trim', explode(',', $post_types_raw));
+    if (empty($post_types)) $post_types = ['post'];
+
+    $placeholders = implode(',', array_fill(0, count($post_types), '%s'));
+
+    $post_ids = $wpdb->get_col(
+        $wpdb->prepare("
+            SELECT ID 
+            FROM {$wpdb->posts}
+            WHERE post_status = 'publish'
+              AND post_type IN ($placeholders)
+        ", $post_types)
+    );
+
+    foreach ($post_ids as $post_id) {
+        $content = get_post_field('post_content', $post_id);
+        $total_words += mimosa_count_filtered_words($content);
+    }
+
+    // 2️⃣ APEX MEDIA review 统计（只统计有内容的）
+    $table = $wpdb->prefix . 'apex_media_items';
+
+    // 可选：只统计已完成的评测
+    $reviews = $wpdb->get_col("
+        SELECT review 
+        FROM {$table}
+        WHERE review IS NOT NULL 
+          AND review != ''
+          AND status IN ('watched', 'finished', 'watching')
+    ");
+
+    foreach ($reviews as $review) {
+        $total_words += mimosa_count_filtered_words($review);
+    }
+
+    // 3️⃣ 书籍映射
     $book_json = get_option('argon_mimosa_book_map', '{}');
     $book_map = json_decode($book_json, true);
     if (!is_array($book_map)) $book_map = [];
 
     $closest_diff = PHP_INT_MAX;
-    $closest_book = '';
+    $closest_book = '一本中篇小说';
+
     foreach ($book_map as $word_count => $book_name) {
         $diff = abs($total_words - (int)$word_count);
         if ($diff < $closest_diff) {
@@ -285,16 +326,17 @@ function get_site_word_count_comparison_filtered() {
         }
     }
 
-    return '本站原创文章的总字数为 ' . number_format($total_words) . ' 字（不含代码），已经接近 ' . $closest_book . ' 的篇幅了！';
+    $result = '本站原创文字评测累计字数为 ' 
+            . number_format($total_words) 
+            . ' 字（不含代码），已经接近' 
+            . esc_html($closest_book) 
+            . '的篇幅了！';
+
+    // 💾 缓存 12 小时
+    set_transient($cache_key, $result, 12 * HOUR_IN_SECONDS);
+
+    return $result;
 }
-
-
-
-
-
-
-
-
 
 
 
