@@ -2320,7 +2320,6 @@ class Apex_Media_List {
         ob_start();
         $uid = 'apxml-'.wp_generate_uuid4();
         ?>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             .apex-baseline-line {display: flex;align-items: center;gap: 8px;}
             .apex-separator {width: 1px;height: 16px;background-color: #ccc;margin: 0 8px;}
@@ -2342,7 +2341,7 @@ class Apex_Media_List {
                 <span class="apex-baseline-value"><?php echo esc_html($median_score); ?></span>
                 <?php endif; ?>
             </div>
-            <!--图表显示，包括下方的script逻辑、上面的chart.js引用-->
+            <!--图表显示，包括下方的script逻辑、chart.js引用-->
             <div class="apex-baseline-line">
                 <canvas id="<?php echo esc_attr($uid . '-chart'); ?>" height="150"></canvas>
             </div>

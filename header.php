@@ -86,6 +86,8 @@
 <head>
     <!--umami用户跟踪-->
     <script defer src="https://umami.loneapex.cn/script.js" data-website-id="82373bbe-f072-4a81-a32e-81d0687b2ebe"></script>
+	<!--acgn列表用的渲染分数图表-->
+	<script src="/wp-content/themes/argon/extra-js/chart.js"></script>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<?php if (get_option('argon_enable_mobile_scale') != 'true'){ ?>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
