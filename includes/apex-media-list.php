@@ -2309,10 +2309,18 @@ class Apex_Media_List {
             }
         }
 
+        $score_distribution = array_fill(0, 11, 0); // 0~10
+
+        foreach ($scores as $s) {
+            $idx = round($s); // 四舍五入到整数
+            if ($idx >= 0 && $idx <= 10) {
+                $score_distribution[$idx]++;
+            }
+        }
         ob_start();
         $uid = 'apxml-'.wp_generate_uuid4();
         ?>
-
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <style>
             .apex-baseline-line {display: flex;align-items: center;gap: 8px;}
             .apex-separator {width: 1px;height: 16px;background-color: #ccc;margin: 0 8px;}
@@ -2326,7 +2334,7 @@ class Apex_Media_List {
                 </span>
             </div>
             <div class="apex-baseline-line">
-                <span class="apex-baseline-title">基准分：</span>
+                <span class="apex-baseline-title">基准分（均值）：</span>
                 <span class="apex-baseline-value"><?php echo esc_html($avg_score); ?></span>
                 <?php if ($median_score !== ''): ?>
                 <span class="apex-separator"></span>
@@ -2334,13 +2342,50 @@ class Apex_Media_List {
                 <span class="apex-baseline-value"><?php echo esc_html($median_score); ?></span>
                 <?php endif; ?>
             </div>
-
+            <!--图表显示，包括下方的script逻辑、上面的chart.js引用-->
+            <div class="apex-baseline-line">
+                <canvas id="<?php echo esc_attr($uid . '-chart'); ?>" height="150"></canvas>
+            </div>
             <div class="apex-baseline-line apex-baseline-sub">
                 <span>
                     共收集 <?php echo intval($total_items); ?> 个作品条目，其中 <?php echo intval($finished_count); ?> 部作品<?php echo $media_type === 'galgame' ? '已通关' : '已观看'; ?>
                 </span>
             </div>
         </div>
+        <script>
+        (function(){
+            const ctx = document.getElementById('<?php echo esc_js($uid . "-chart"); ?>').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: <?php echo json_encode(range(0, 10)); ?>,
+                    datasets: [{
+                        label: '数量：',
+                        data: <?php echo json_encode($score_distribution); ?>,
+                        fill: false,
+                        borderColor: '#4f46e5',
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: { display: true, text: '分数（四舍五入）' },
+                            ticks: { stepSize: 1 }
+                        },
+                        y: {
+                            title: { display: true, text: '数量' },
+                            beginAtZero: true,
+                            precision: 0
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        })();
+        </script>
         <?php endif; ?>
             <div class="apex-media-toolbar">
                 <?php if ($atts['show_tabs'] !== 'false'): ?>
