@@ -2267,43 +2267,81 @@ class Apex_Media_List {
             'order' => 'DESC',
             'limit' => $limit,
         ]);
+
         $item_tags_map = [];
         $avg_score = '';
+        $median_score = '';
         $total_items = count($items);
         $finished_count = 0;
+
         if (!empty($items)) {
             $item_ids = array_map(function($r){ return intval($r['id']); }, $items);
             $item_tags_map = $this->media_items_get_tags_map($item_ids);
-            $sum = 0; $cnt = 0;
+
+            $sum = 0; 
+            $cnt = 0;
+            $scores = [];
+
             foreach ($items as $r) {
                 $s = $this->resolve_score_10_from_row($r);
-                if ($s > 0) { $sum += $s; $cnt++; }
+                if ($s > 0) {
+                    $sum += $s; 
+                    $cnt++; 
+                    $scores[] = $s;
+                }
                 if (isset($r['status']) && $r['status'] === 'watched') {
                     $finished_count++;
                 }
             }
+
             if ($cnt > 0) {
+                // 平均分
                 $avg_score = number_format($sum / $cnt, 1);
+
+                // 中位数
+                sort($scores, SORT_NUMERIC);
+                $mid = intdiv(count($scores), 2);
+                if (count($scores) % 2 === 0) {
+                    $median_score = number_format(($scores[$mid - 1] + $scores[$mid]) / 2, 1);
+                } else {
+                    $median_score = number_format($scores[$mid], 1);
+                }
             }
         }
 
         ob_start();
         $uid = 'apxml-'.wp_generate_uuid4();
         ?>
+
+        <style>
+            .apex-baseline-line {display: flex;align-items: center;gap: 8px;}
+            .apex-separator {width: 1px;height: 16px;background-color: #ccc;margin: 0 8px;}
+        </style>
         <div class="apex-media-list" id="<?php echo esc_attr($uid); ?>" data-type="<?php echo esc_attr($post_type); ?>">
             <?php if ($avg_score !== ''): ?>
-            <div class="apex-baseline">
-                <div class="apex-baseline-line">
-                    <span class="apex-baseline-title"><?php echo $media_type === 'galgame' ? 'Galgame 列表基准分：' : '番剧列表基准分：'; ?></span>
-                    <span class="apex-baseline-value"><?php echo esc_html($avg_score); ?></span>
-                </div>
-                <div class="apex-baseline-line apex-baseline-sub">
-                    <span>
-                        共收集 <?php echo intval($total_items); ?> 个作品条目，其中 <?php echo intval($finished_count); ?> 部作品<?php echo $media_type === 'galgame' ? '已通关' : '已观看'; ?>
-                    </span>
-                </div>
+        <div class="apex-baseline">
+            <div class="apex-baseline-line">
+                <span class="apex-baseline-title">
+                    <?php echo $media_type === 'galgame' ? 'Galgame 列表' : '番剧列表'; ?>
+                </span>
             </div>
-            <?php endif; ?>
+            <div class="apex-baseline-line">
+                <span class="apex-baseline-title">基准分：</span>
+                <span class="apex-baseline-value"><?php echo esc_html($avg_score); ?></span>
+                <?php if ($median_score !== ''): ?>
+                <span class="apex-separator"></span>
+                <span class="apex-baseline-title">中位数：</span>
+                <span class="apex-baseline-value"><?php echo esc_html($median_score); ?></span>
+                <?php endif; ?>
+            </div>
+
+            <div class="apex-baseline-line apex-baseline-sub">
+                <span>
+                    共收集 <?php echo intval($total_items); ?> 个作品条目，其中 <?php echo intval($finished_count); ?> 部作品<?php echo $media_type === 'galgame' ? '已通关' : '已观看'; ?>
+                </span>
+            </div>
+        </div>
+        <?php endif; ?>
             <div class="apex-media-toolbar">
                 <?php if ($atts['show_tabs'] !== 'false'): ?>
                 <div class="apex-media-tabs" role="tablist">

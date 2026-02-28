@@ -264,7 +264,7 @@ function mimosa_count_filtered_words($content) {
 function get_site_word_count_comparison_filtered() {
     global $wpdb;
 
-    // 🚀 结果缓存 12 小时
+    // 🚀 结果缓存
     $cache_key = 'mimosa_site_word_count_filtered';
     $cached = get_transient($cache_key);
     if ($cached !== false) {
@@ -333,7 +333,7 @@ function get_site_word_count_comparison_filtered() {
             . '的篇幅了！';
 
     // 💾 缓存 12 小时
-    set_transient($cache_key, $result, 12 * HOUR_IN_SECONDS);
+    // set_transient($cache_key, $result, 12 * HOUR_IN_SECONDS);
 
     return $result;
 }

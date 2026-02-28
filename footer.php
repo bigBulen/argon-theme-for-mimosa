@@ -528,7 +528,7 @@ html.darkmode .comment--location svg {
     }).mount('#sakana-container');
   }
 
-  // 只在脚本载入完成后初始化（异步加载的情况请确保 onload 调用 init）
+  // 只在脚本载入完成后初始化（异步加载的情况确保 onload 调用 init）
   window.addEventListener('DOMContentLoaded', function () {
     if (window.SakanaWidget) {
       initSakanaMulti();
@@ -543,9 +543,8 @@ html.darkmode .comment--location svg {
   src="https://loneapex.cn/wp-content/themes/argon/extra-js/beauty/sakana.min.js"
 ></script>
 
-
-
-<!-- 技术债，懒得搞了，日程表的多余元素，直接隐藏掉 -->
+<!-- 技术债，懒得搞了，日程表多余的元素直接隐藏掉 -->
+<!-- 什么叫只有不到三千行代码，这个奇葩的元素在第5000行，我服了orz. -->
 <script>
   document.addEventListener('DOMContentLoaded', ()=> {
   const el = document.querySelector('.timeline-back-to-top');
@@ -553,6 +552,10 @@ html.darkmode .comment--location svg {
 });
 </script>
 
+<script>
+    console.log('这里是控制台。（这不废话嘛……）');
+    console.log('使用的argon主题原版本号为1.3.5。上方显示的版本号（<?php echo $GLOBALS['theme_version']; ?>）仅供刷新cdn缓存用。');
+</script>
 
 </body>
 <?php echo get_option('argon_custom_html_foot'); ?>
