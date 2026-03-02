@@ -13,10 +13,107 @@ function argon_get_home_feed_combined($paged = null) {
     if ($paged <= 0) {
         $paged = max(1, get_query_var('paged'), get_query_var('page'));
     }
+
     $per_page = max(1, intval(get_option('posts_per_page', 10)));
-    $fetch_size = $per_page * $paged + $per_page;
+
+    // 读取折叠状态（与你模板保持一致）
+    $collapse_mode = isset($_GET['apex_media_collapse_mode'])
+        ? sanitize_text_field($_GET['apex_media_collapse_mode'])
+        : get_option('apex_media_collapse_mode', 'adjacent');
+
+    $collapse_all = ($collapse_mode === 'all');
 
     $post_types = ['post', 'shuoshuo', 'site_notice'];
+    $posts_query = new WP_Query([
+        'post_type' => $post_types,
+        'posts_per_page' => -1, // 🔥 折叠模式需要全量 posts 来分页
+        'post_status' => 'publish',
+        'orderby' => 'date',
+        'order' => 'DESC',
+        'ignore_sticky_posts' => false,
+        'no_found_rows' => true,
+    ]);
+    $posts = $posts_query->posts;
+
+    $sticky_ids_raw = get_option('sticky_posts', []);
+    $sticky_ids = array_values(array_filter(is_array($sticky_ids_raw) ? $sticky_ids_raw : [], function($id){
+        return get_post_status($id) === 'publish';
+    }));
+    $sticky_rank = 0;
+
+    $posts_stream = [];
+    foreach ($posts as $p) {
+        $ts = get_post_time('U', true, $p);
+        if (in_array($p->ID, $sticky_ids, true)) {
+            $ts = PHP_INT_MAX - $sticky_rank++;
+        }
+        $posts_stream[] = [
+            'kind' => 'post',
+            'type' => get_post_type($p),
+            'ts'   => $ts,
+            'post' => $p,
+        ];
+    }
+
+    $media_stream = [];
+    if ($apex_media_list instanceof Apex_Media_List) {
+        $media_items = $apex_media_list->media_query([
+            'show_on_home_feed' => true,
+            'order_by' => 'finished_at',
+            'order' => 'DESC',
+            'limit' => -1,
+            'offset' => 0,
+        ]);
+
+        foreach ($media_items as $m) {
+            $ts = $apex_media_list->resolve_finished_timestamp($m);
+            $media_stream[] = [
+                'kind'  => 'media',
+                'type'  => $m['type'] ?? 'media',
+                'ts'    => $ts,
+                'media' => $m,
+            ];
+        }
+    }
+
+    // 🔥 折叠开启：分页只按 post 走
+    if ($collapse_all) {
+        usort($posts_stream, fn($a, $b) => $b['ts'] <=> $a['ts']);
+
+        $start = ($paged - 1) * $per_page;
+        $page_posts = array_slice($posts_stream, $start, $per_page);
+
+        // media 只参与展示，不参与分页
+        usort($media_stream, fn($a, $b) => $b['ts'] <=> $a['ts']);
+
+        $page_max_ts = !empty($page_posts) ? $page_posts[0]['ts'] : PHP_INT_MAX;
+        $page_min_ts = !empty($page_posts) ? end($page_posts)['ts'] : 0;
+
+        $page_media = array_values(array_filter($media_stream, function($m) use ($page_max_ts, $page_min_ts) {
+			// 包含边界 + 给下页留余地
+			return $m['ts'] <= $page_max_ts && $m['ts'] > $page_min_ts;
+		}));
+
+        // 可选：限制每页最多插入 N 个 media，防刷屏
+        // $page_media = array_slice($page_media, 0, 5);
+
+        $items = array_merge($page_posts, $page_media);
+        usort($items, fn($a, $b) => $b['ts'] <=> $a['ts']);
+
+        return [
+            'items'      => $items,
+            'paged'      => $paged,
+            'per_page'   => $per_page,
+            'total'      => count($posts_stream), // 🔥 只按文章分页
+            'post_total' => count($posts_stream),
+            'media_total'=> count($media_stream),
+        ];
+    }
+
+    // ========= 折叠关闭：你原来的混合流逻辑 =========
+
+    $fetch_size = $per_page * $paged + $per_page;
+
     $posts_query = new WP_Query([
         'post_type' => $post_types,
         'posts_per_page' => $fetch_size,
@@ -27,12 +124,6 @@ function argon_get_home_feed_combined($paged = null) {
     ]);
     $posts = $posts_query->posts;
     $post_total = intval($posts_query->found_posts);
-
-    $sticky_ids_raw = get_option('sticky_posts', []);
-    $sticky_ids = array_values(array_filter(is_array($sticky_ids_raw) ? $sticky_ids_raw : [], function($id){
-        return get_post_status($id) === 'publish';
-    }));
-    $sticky_rank = 0;
 
     $media_items = [];
     $media_total = 0;
@@ -50,13 +141,12 @@ function argon_get_home_feed_combined($paged = null) {
     }
 
     $combined = [];
+    $sticky_rank = 0;
+
     foreach ($posts as $p) {
         $ts = get_post_time('U', true, $p);
-        $is_sticky = in_array($p->ID, $sticky_ids, true);
-        if ($is_sticky) {
-            // Sticky 置顶：放到时间轴最前，保持 sticky 顺序
-            $ts = PHP_INT_MAX - $sticky_rank;
-            $sticky_rank++;
+        if (in_array($p->ID, $sticky_ids, true)) {
+            $ts = PHP_INT_MAX - $sticky_rank++;
         }
         $combined[] = [
             'kind' => 'post',
@@ -65,8 +155,9 @@ function argon_get_home_feed_combined($paged = null) {
             'post' => $p,
         ];
     }
+
     foreach ($media_items as $m) {
-        $ts = ($apex_media_list instanceof Apex_Media_List) ? $apex_media_list->resolve_finished_timestamp($m) : 0;
+        $ts = $apex_media_list->resolve_finished_timestamp($m);
         $combined[] = [
             'kind'  => 'media',
             'type'  => $m['type'] ?? 'media',
@@ -79,17 +170,15 @@ function argon_get_home_feed_combined($paged = null) {
         if ($a['ts'] === $b['ts']) {
             $aid = ($a['kind'] === 'media') ? intval($a['media']['id'] ?? 0) : intval($a['post']->ID ?? 0);
             $bid = ($b['kind'] === 'media') ? intval($b['media']['id'] ?? 0) : intval($b['post']->ID ?? 0);
-            return $bid <=> $aid; // 新的优先级：时间相同按 ID 倒序
+            return $bid <=> $aid;
         }
         return $b['ts'] <=> $a['ts'];
     });
 
-	$real_total = count($combined);
-	
     $start = ($paged - 1) * $per_page;
     $items = array_slice($combined, $start, $per_page);
 
-	return [
+    return [
         'items'      => $items,
         'paged'      => $paged,
         'per_page'   => $per_page,
@@ -99,7 +188,6 @@ function argon_get_home_feed_combined($paged = null) {
         'posts_query'=> $posts_query,
     ];
 }
-
 function argon_render_home_feed_pagination($total, $per_page, $paged) {
     $total_pages = $per_page > 0 ? ceil($total / $per_page) : 1;
     if ($total_pages <= 1) {
@@ -3974,6 +4062,8 @@ add_action('wp_head', function () {
 }, 5);
 
 
+// 首页主查询是“空的 / 不匹配分页”，所以即使自己渲染出内容，WP 也觉得这是不存在的页码。
+// 因此，添加钩子，让wp强制添分页
 add_action('pre_get_posts', function($q) {
     if (is_admin() || !$q->is_main_query()) {
         return;
