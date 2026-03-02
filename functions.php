@@ -84,10 +84,12 @@ function argon_get_home_feed_combined($paged = null) {
         return $b['ts'] <=> $a['ts'];
     });
 
+	$real_total = count($combined);
+	
     $start = ($paged - 1) * $per_page;
     $items = array_slice($combined, $start, $per_page);
 
-    return [
+	return [
         'items'      => $items,
         'paged'      => $paged,
         'per_page'   => $per_page,
@@ -326,9 +328,9 @@ function get_site_word_count_comparison_filtered() {
         }
     }
 
-    $result = '本站原创文字评测累计字数为 ' 
+    $result = '本站原创文章字数为 ' 
             . number_format($total_words) 
-            . ' 字（不含代码），已经接近' 
+            . ' 字（不含代码块），已经接近' 
             . esc_html($closest_book) 
             . '的篇幅了！';
 
@@ -3970,3 +3972,25 @@ add_action('wp_head', function () {
     echo '<meta property="og:image" content="' . esc_url($img) . '">' . "\n";
     echo '<meta name="description" content="' . esc_attr($desc) . '">' . "\n";
 }, 5);
+
+
+add_action('pre_get_posts', function($q) {
+    if (is_admin() || !$q->is_main_query()) {
+        return;
+    }
+
+    if ($q->is_home()) {
+        // 让 WP 以为首页是有内容可分页的
+        $q->set('post_type', ['post', 'shuoshuo', 'site_notice']);
+        $q->set('posts_per_page', 1); // 最小占位即可
+        $q->set('ignore_sticky_posts', false);
+    }
+});
+
+add_action('template_redirect', function() {
+    if (is_home() && is_404()) {
+        global $wp_query;
+        $wp_query->is_404 = false;
+        status_header(200);
+    }
+});
