@@ -143,11 +143,11 @@
 </style>
 
 <!-- 引用-楷体 -->
-<link href="https://fontsapi.zeoseven.com/582/main/result.css" onload="this.rel='stylesheet'" rel="preload" as="style" crossorigin />
-<noscript><link rel="stylesheet" href="https://fontsapi.zeoseven.com/582/main/result.css" /></noscript>
+<link href="https://fontsapi.zeoseven.com/993/main/result.css" onload="this.rel='stylesheet'" rel="preload" as="style" crossorigin />
+<noscript><link rel="stylesheet" href="https://fontsapi.zeoseven.com/993/main/result.css" /></noscript>
 <style>
     blockquote {
-        font-family: "gkai00mp";
+        font-family: "LXGW Bright";
         font-weight: light;
     }
 </style>
@@ -373,6 +373,7 @@ body {
 <link rel="stylesheet" href="/wp-content/themes/argon/extra-js/Aplayer/APlayer.min.css">
 <script src="/wp-content/themes/argon/extra-js/Aplayer/APlayer.min.js"></script>
 <script src="/wp-content/themes/argon/extra-js/Aplayer/Meting.min.js"></script>
+<!-- 8159389492 -->
 <meting-js 
     server="netease" 
     type="playlist" 
@@ -553,8 +554,7 @@ html.darkmode .comment--location svg {
 </script>
 
 <script>
-    console.log('这里是控制台。（这不废话嘛……）');
-    console.log('使用的argon主题原版本号为1.3.5。上方显示的版本号（<?php echo $GLOBALS['theme_version']; ?>）仅供刷新cdn缓存用。');
+    console.log('一切准备就绪。');
 </script>
 
 </body>

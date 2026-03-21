@@ -2436,8 +2436,8 @@ class Apex_Media_List {
                     $updated_ts = !empty($updated) ? strtotime($updated) : 0;
                     $created_ts = !empty($created) ? strtotime($created) : 0;
                     $tags = isset($item_tags_map[$item['id']]) ? $item_tags_map[$item['id']] : [];
-                    $start_label = $media_type === 'galgame' ? '发售：' : '放送开始：';
-                    $finish_label = $media_type === 'galgame' ? '通关于：' : '完成于：';
+                    $start_label = $media_type === 'galgame' ? '发售' : '放送';
+                    $finish_label = $media_type === 'galgame' ? '通关' : '完成';
                     $home_flag = !empty($item['show_on_home_feed']);
                     ?>
                     <div class="apex-card card shadow-sm"
@@ -2493,17 +2493,19 @@ class Apex_Media_List {
                                 </div>
                                 <?php if (!empty($season)): ?>
                                 <div class="apex-meta-row">
-                                    <span class="apex-meta-label"><?php echo esc_html($start_label); ?></span>
+                                    
                                     <span class="apex-meta-text"><?php echo esc_html($season); ?></span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (!empty($finished)): ?>
-                                <div class="apex-meta-row">
-                                    <span class="apex-meta-label"><?php echo esc_html($finish_label); ?></span>
-                                    <span class="apex-meta-text"><?php echo esc_html($finished); ?></span>
-                                </div>
+                                    <span class="apex-meta-label"><?php echo esc_html($start_label); ?></span>
                                 <?php endif; ?>
 
+                                
+                                <?php if (!empty($finished)): ?>
+                                    <span> | </span>
+                                    <span class="apex-meta-text"><?php echo esc_html($finished); ?></span>
+                                    <span class="apex-meta-label"><?php echo esc_html($finish_label); ?></span>
+                                
+                                <?php endif; ?>
+                                </div>
                                 <div class="apex-review line-clamp">
                                     <?php echo esc_html(wp_strip_all_tags($review)); ?>
                                 </div>

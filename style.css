@@ -3,7 +3,7 @@ Theme Name: argon
 Author: solstice23
 Author URI: https://solstice23.top/
 Description: 轻盈、简洁、美观的 Wordpress 主题
-Version: 1.4.9m
+Version: 1.5.6m
 License: GNU General Public License v3.0
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Tags: 简约, 两栏, 侧栏在左边, 浮动侧栏, 文章目录, 自适应, 夜间模式, 可自定义
@@ -5558,4 +5558,69 @@ html.darkmode .post-series-license-text a, html.darkmode .post-original-link a {
 .apex-media-card--in-post .media-feed-card {
     margin-left: 0 !important;
     margin-right: auto !important;
+}
+
+/* 弹窗注释*/
+/* ===== 注释文字本体 ===== */
+.annotate {
+  color: #3b82f6;
+  cursor: pointer;
+  border-bottom: 1px dotted currentColor;
+  position: relative;
+}
+
+/* ===== 弹出卡片 ===== */
+.annotation-popup {
+  position: absolute;
+  z-index: 9999;
+
+  max-width: 280px;
+  padding: 10px 12px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  border-radius: 8px;
+  background: #ffffff;
+  color: #222;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition: all 0.18s ease;
+
+  pointer-events: none;
+}
+
+/* 显示状态 */
+.annotation-popup.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* 小箭头 */
+.annotation-popup::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 14px;
+
+  width: 10px;
+  height: 10px;
+
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+/* ===== 暗色模式 ===== */
+html.darkmode .annotate {
+  color: #60a5fa;
+}
+
+html.darkmode .annotation-popup {
+  background: #1e1e1e;
+  color: #ddd;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
