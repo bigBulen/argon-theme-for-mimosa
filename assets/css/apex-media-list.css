@@ -20,13 +20,13 @@ html.darkmode .apex-baseline-sub{color:#e8d9ff}
 .apex-media-actions{display:flex;align-items:center;gap:10px}
 .apex-media-actions .apex-media-sort label{margin-right:6px;color:#525f7f;font-weight:600}
 .apex-media-actions .apex-media-sort select{border:1px solid rgba(0,0,0,.1);border-radius:6px;padding:6px 8px;background:#fff}
-.apex-media-actions .btn-filter{border:1px solid rgba(0,0,0,.08);background:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}
+.btn-filter{border:1px solid rgba(36, 82, 94, 0.247);background:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}
 
 /* Grid - force single column */
 .apex-media-grid{display:grid;gap:14px;grid-template-columns:1fr}
 
 /* Card */
-.apex-card.card{border:0;border-radius:8px;overflow:hidden}
+.apex-card.card{border:0;border-radius:8px;overflow:hidden;contain:layout style}
 .apex-card .apex-card-inner{display:flex;gap:14px;padding:14px}
 .apex-cover-wrapper {
     flex: 0 0 120px;
@@ -44,17 +44,85 @@ html.darkmode .apex-baseline-sub{color:#e8d9ff}
 .apex-title-row .apex-title{
   font-size:1rem;margin:0;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;overflow-wrap:anywhere;word-break:normal;white-space:normal
+  overflow:hidden;overflow-wrap:anywhere;word-break:normal;white-space:normal;
+  line-height:1.2; min-height:0
 }
 .apex-title-row .apex-title a{color:#5e72e4}
 .apex-title-row .apex-badges{display:flex;gap:6px;flex:0 0 auto} /* legacy selector: no longer used for badges */
-.apex-badges{display:flex;gap:6px;margin-bottom:6px}
+.apex-badges{display:flex;gap:6px;margin-bottom:2px}
 .apex-badges .badge{display:inline-block;font-size:12px;padding:2px 6px;border-radius:999px;background:#edf2f9;color:#445}
 .badge-type{background:#e6f0ff;color:#2b50aa}
 .badge-status{background:#eaf7ea;color:#2f7a2f}
 .apex-meta-row{display:flex;gap:6px;align-items:center;font-size:.85rem;color:#9ca3af;margin:2px 0}
 .apex-meta-label{font-weight:600;color:#7cc5c0}
 .apex-meta-text{color:#87c0c4}
+/* 评论字数 & 类型 */
+.apex-review-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:6px;
+  margin-bottom:6px;
+  font-size:12px;
+  color:#888;
+}
+
+/* 字数 */
+.apex-review-meta .review-length{
+  color:#999;
+}
+
+/* 中间分界线（重点） */
+.apex-review-meta .review-divider{
+  width:1px;
+  height:12px;
+  background:#ddd;
+  display:inline-block;
+}
+
+/* 类型标签 */
+.apex-review-meta .review-type{
+  padding:1px 6px;
+  border-radius:999px;
+  font-size:11px;
+  line-height:1.4;
+}
+
+/* 长评 */
+.apex-review-meta .review-type.long{
+  background:#e7f1ff;
+  color:#3b82f6;
+}
+
+/* 短评 */
+.apex-review-meta .review-type.short{
+  background:#f1f5f9;
+  color:#64748b;
+}
+
+html.darkmode .apex-review-meta{
+  color:#aaa;
+}
+
+html.darkmode .review-length{
+  color:#888;
+}
+
+html.darkmode .review-divider{
+  background:#444;
+}
+
+/* 长评 */
+html.darkmode .review-type.long{
+  background:#1e3a5f;
+  color:#93c5fd;
+}
+
+/* 短评 */
+html.darkmode .review-type.short{
+  background:#2a2f36;
+  color:#9ca3af;
+}
 
 /* Tags */
 .apex-tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
@@ -84,7 +152,13 @@ html.darkmode .apex-tag-chip {
     opacity: 0.85;
     cursor: default;
 }
-
+/* 按钮 + 信息 同行 */
+.apex-review-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:6px;
+}
 
 /* Score bar as background */
 .apex-scorebar{position:relative;height:28px;border-radius:8px;background:rgba(0,0,0,.06);overflow:hidden;margin-top:8px}
@@ -104,7 +178,7 @@ html.darkmode .apex-grade-tip-desc{color:#e5e7eb}
 
 /* Review clamp and button */
 html.darkmode .apex-review{ color: rgba(255, 255, 255, 0.863) !important; }
-.apex-review{font-size:.95rem;cmargin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
+.apex-review{font-size:.95rem;cmargin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word}
 .apex-card .btn-readmore{margin-top:6px;border:1px solid rgba(0,0,0,.1);background:#fff;border-radius:6px;padding:4px 8px;font-size:.9rem;cursor:pointer}
 
 @media (max-width: 576px) {
@@ -147,7 +221,7 @@ html.darkmode .apex-media-tabs .tab{background:#1f2531;color:#cbd5e1;border-colo
 html.darkmode .apex-media-tabs .tab.active{background:#4c6ef5;color:#fff}
 html.darkmode .apex-media-actions .apex-media-sort label{color:#cbd5e1}
 html.darkmode .apex-media-actions .apex-media-sort select,
-html.darkmode .apex-media-actions .btn-filter{background:#1f2531;color:#cbd5e1;border-color:#2a3142}
+html.darkmode .btn-filter{background:#202e18;color:#cbd5e1;border-color:#427467}
 html.darkmode .apex-card.card{background:#111827}
 html.darkmode .apex-card .apex-cover{background:#10151f}
 html.darkmode .apex-title-row .apex-title a{color:#8ab4ff}
@@ -167,6 +241,7 @@ html.darkmode .apex-filter-modal .apex-modal-footer{border-color:#1f2937}
 html.darkmode .filter-field input,
 html.darkmode .filter-field select{background:#1f2531;color:#cbd5e1;border-color:#2a3142}
 html.darkmode .btn-filter-reset{background:#1f2531;color:#cbd5e1;border-color:#2a3142}
+html.darkmode .review-length{color:#bcdaff}
 
 /* Home feed media card */
 .media-feed-card{width:78%;margin-left:auto;margin-right:0;margin-bottom:22px;border:0;border-radius:14px;overflow:hidden;background:var(--media-card-bg,#fff);position:relative;box-shadow:0 12px 30px rgba(15,23,42,0.08)}

@@ -2393,8 +2393,10 @@ class Apex_Media_List {
                     <button class="tab" data-status="want">想看</button>
                     <button class="tab" data-status="watching">在看</button>
                     <button class="tab" data-status="watched">看过</button>
+                    <button class="btn-filter" type="button">筛选</button>
                 </div>
                 <?php endif; ?>
+                
                 <div class="apex-media-actions">
                     <div class="apex-media-sort">
                         <label>排序</label>
@@ -2404,7 +2406,6 @@ class Apex_Media_List {
                             <option value="time" <?php selected($atts['order'], 'time'); ?>>发售/放映时间</option>
                         </select>
                     </div>
-                    <button class="btn-filter" type="button">筛选</button>
                 </div>
             </div>
 
@@ -2491,29 +2492,49 @@ class Apex_Media_List {
                                         </a>
                                     </h3>
                                 </div>
-                                <?php if (!empty($season)): ?>
                                 <div class="apex-meta-row">
-                                    
-                                    <span class="apex-meta-text"><?php echo esc_html($season); ?></span>
-                                    <span class="apex-meta-label"><?php echo esc_html($start_label); ?></span>
-                                <?php endif; ?>
+                                    <?php if (!empty($season)): ?>
+                                        <span class="apex-meta-text"><?php echo esc_html($season); ?></span>
+                                        <span class="apex-meta-label"><?php echo esc_html($start_label); ?></span>
+                                    <?php endif; ?>
 
-                                
-                                <?php if (!empty($finished)): ?>
-                                    <span> | </span>
-                                    <span class="apex-meta-text"><?php echo esc_html($finished); ?></span>
-                                    <span class="apex-meta-label"><?php echo esc_html($finish_label); ?></span>
-                                
-                                <?php endif; ?>
+                                    <?php if (!empty($season) && !empty($finished)): ?>
+                                        <span> | </span>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($finished)): ?>
+                                        <span class="apex-meta-text"><?php echo esc_html($finished); ?></span>
+                                        <span class="apex-meta-label"><?php echo esc_html($finish_label); ?></span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="apex-review line-clamp">
                                     <?php echo esc_html(wp_strip_all_tags($review)); ?>
                                 </div>
-                                <?php if (mb_strlen(wp_strip_all_tags($review)) > 0): ?>
-                                    <a href="<?php echo esc_url($detail_url); ?>">
-                                    <button class="btn-readmore" type="button">阅读全文</button>
-                                    </a>
+
+                                <?php 
+                                $review_text = wp_strip_all_tags($review);
+                                $review_length = mb_strlen($review_text);
+                                $is_long = $review_length > 250;
+                                ?>
+
+                                <?php if ($review_length > 0): ?>
+                                    <div class="apex-review-actions">
+                                        <a href="<?php echo esc_url($detail_url); ?>">
+                                            <button class="btn-readmore" type="button">阅读全文</button>
+                                        </a>
+
+                                        <div class="apex-review-meta">
+                                            <span class="review-type <?php echo $is_long ? 'long' : 'short'; ?>">
+                                                <?php echo $is_long ? '长评' : '短评'; ?>
+                                            </span>
+                                            <span class="review-divider"></span>
+                                            <span class="review-length">
+                                                +<?php echo $review_length; ?> 字
+                                            </span>
+                                        </div>
+                                    </div>
                                 <?php endif; ?>
+
                                 <?php if (!empty($tags)): ?>
                                 <div class="apex-tag-list">
                                     <span class="apex-tag-label">标签：</span>
@@ -2547,7 +2568,7 @@ class Apex_Media_List {
                 <div class="apex-modal-mask"></div>
                 <div class="apex-modal-dialog card">
                     <div class="apex-modal-header">
-                        <span class="apex-modal-title">筛选</span>
+                        <span class="apex-modal-title">精确查找</span>
                         <button class="apex-modal-close" aria-label="close">×</button>
                     </div>
                     <div class="apex-modal-body">

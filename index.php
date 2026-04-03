@@ -64,9 +64,9 @@
         /*
         * collapse_all_hide_first = true：作品条目全折叠，只显示一条「展开全部」
         * collapse_all_hide_first = false：显示第一条作品条目 + 展开框
-        * 全部显示&仅显示一条需要去作品条目后台管理开启。collapse_all_hide_first仅对显示一条有效。
+        * 全部显示&仅显示一条需要去acgn作品条目后台管理开启。collapse_all_hide_first仅对显示一条有效。
         */
-        $collapse_all_hide_first = true;
+        $collapse_all_hide_first = false;
 
 
         if (!empty($feed['items'])) :

@@ -373,7 +373,6 @@ body {
 <link rel="stylesheet" href="/wp-content/themes/argon/extra-js/Aplayer/APlayer.min.css">
 <script src="/wp-content/themes/argon/extra-js/Aplayer/APlayer.min.js"></script>
 <script src="/wp-content/themes/argon/extra-js/Aplayer/Meting.min.js"></script>
-<!-- 8159389492 -->
 <meting-js 
     server="netease" 
     type="playlist" 
@@ -386,8 +385,8 @@ body {
     list-folded="true"
 ></meting-js>
 
-
-
+<!-- 加载预制格式 -->
+<script src="<?php echo $GLOBALS['assets_path']; ?>/includes/prefabricated-format.js?v<?php echo $GLOBALS['theme_version']; ?>"></script>
 
 <script>
   function hexToRgb(hex,op){
